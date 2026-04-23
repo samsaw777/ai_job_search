@@ -12,8 +12,26 @@ class Settings(BaseSettings):
 
     # ── LLM API Keys ──
     GROQ_API_KEY: str = ""
-    GOOGLE_API_KEY: str = ""
     OPENAI_API_KEY: str = ""
+
+    # Gemini keys — up to 5, rotated automatically on rate limit
+    GOOGLE_API_KEY_1: str = ""
+    GOOGLE_API_KEY_2: str = ""
+    GOOGLE_API_KEY_3: str = ""
+    GOOGLE_API_KEY_4: str = ""
+    GOOGLE_API_KEY_5: str = ""
+
+    @property
+    def gemini_api_keys(self) -> list[str]:
+        """Return all non-empty Gemini keys in order."""
+        keys = [
+            self.GOOGLE_API_KEY_1,
+            self.GOOGLE_API_KEY_2,
+            self.GOOGLE_API_KEY_3,
+            self.GOOGLE_API_KEY_4,
+            self.GOOGLE_API_KEY_5,
+        ]
+        return [k for k in keys if k.strip()]
 
     # ── LangChain / LangSmith (optional, for tracing) ──
     LANGCHAIN_API_KEY: str = ""
