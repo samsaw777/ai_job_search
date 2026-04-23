@@ -14,9 +14,7 @@ class Settings(BaseSettings):
     GROQ_API_KEY: str = ""
     OPENAI_API_KEY: str = ""
 
-    # Gemini — up to 5 keys, rotated automatically on rate limit.
-    # Also accepts the legacy GOOGLE_API_KEY as key 1.
-    GOOGLE_API_KEY: str = ""
+    # Gemini keys — up to 5, rotated automatically on rate limit
     GOOGLE_API_KEY_1: str = ""
     GOOGLE_API_KEY_2: str = ""
     GOOGLE_API_KEY_3: str = ""
@@ -25,18 +23,15 @@ class Settings(BaseSettings):
 
     @property
     def gemini_api_keys(self) -> list[str]:
-        """All non-empty Gemini keys in order (numbered keys first, legacy fallback)."""
-        numbered = [
+        """Return all non-empty Gemini keys in order."""
+        keys = [
             self.GOOGLE_API_KEY_1,
             self.GOOGLE_API_KEY_2,
             self.GOOGLE_API_KEY_3,
             self.GOOGLE_API_KEY_4,
             self.GOOGLE_API_KEY_5,
         ]
-        keys = [k for k in numbered if k.strip()]
-        if not keys and self.GOOGLE_API_KEY.strip():
-            keys = [self.GOOGLE_API_KEY]
-        return keys
+        return [k for k in keys if k.strip()]
 
     # ── LangChain / LangSmith (optional, for tracing) ──
     LANGCHAIN_API_KEY: str = ""
