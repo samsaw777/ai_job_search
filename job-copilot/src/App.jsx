@@ -108,13 +108,14 @@ function App() {
           url: data.url,
           scrapedAt: data.scrapedAt,
           content: data.content,
-          resume: null, // TODO: will add resume later
+          resume: null,
         }),
       });
 
       if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.detail || "Backend error");
+        const body = await response.json().catch(() => ({}));
+        const msg = body.detail || "Something went wrong. Try again.";
+        throw new Error(msg);
       }
 
       const result = await response.json();
@@ -131,11 +132,12 @@ function App() {
         rewrittenBullets: result.rewrittenBullets || [],
         outreachSearchQueries: result.outreachSearchQueries || [],
         parsedJob: result.parsedJob || {},
+        pipelineWarning: result.meta?.pipelineWarning || null,
       });
       setCurrentView("analysis");
       setIsLoading(false);
     } catch (err) {
-      setError(`Analysis failed: ${err.message}`);
+      setError(err.message);
       setIsLoading(false);
     }
   };
@@ -147,8 +149,8 @@ function App() {
       body: JSON.stringify(payload),
     });
     if (!response.ok) {
-      const err = await response.json();
-      throw new Error(err.detail || "Failed to save to Google Sheets");
+      const body = await response.json().catch(() => ({}));
+      throw new Error(body.detail || "Failed to save to Google Sheets");
     }
     return response.json();
   };

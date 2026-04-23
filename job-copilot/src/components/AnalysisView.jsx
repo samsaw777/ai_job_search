@@ -72,6 +72,18 @@ export default function AnalysisView({ analysis, scrapedData, onBack, onSaveToSh
 
   return (
     <div className="analysis-view">
+      {/* Pipeline warning — shown when a node partially failed */}
+      {analysis.pipelineWarning && (
+        <div className="pipeline-warning">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+            <path d="M6.5 1L12 11.5H1L6.5 1Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/>
+            <path d="M6.5 5v3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+            <circle cx="6.5" cy="9.5" r="0.6" fill="currentColor"/>
+          </svg>
+          Some AI nodes ran with errors — results may be incomplete.
+        </div>
+      )}
+
       {/* Job Info Header */}
       {analysis.parsedJob &&
         (analysis.parsedJob.title || analysis.parsedJob.company) && (
