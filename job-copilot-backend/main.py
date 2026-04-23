@@ -1,14 +1,27 @@
-import time
 import io
+import logging
+import time
+import traceback
+
 from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from PyPDF2 import PdfReader
+
 from app.config import get_settings
 from app.models.schemas import AnalyzeRequest
 from app.pipeline import pipeline
-from app.resume_store import save_resume, get_resume, delete_resume, save_preferences, get_preferences, delete_preferences
+from app.resume_store import (
+    save_resume, get_resume, delete_resume,
+    save_preferences, get_preferences, delete_preferences,
+)
 from app.sheets_client import save_application
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+)
+logger = logging.getLogger(__name__)
 
 settings = get_settings()
 
@@ -18,7 +31,6 @@ app = FastAPI(
     version=settings.APP_VERSION,
 )
 
-# Allow requests from Chrome extension
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
@@ -28,12 +40,46 @@ app.add_middleware(
 )
 
 
+# ── Error helpers ─────────────────────────────────────────────────────────────
+
+def _classify_error(exc: Exception) -> tuple[int, str]:
+    """Map a raw exception to (http_status, user-friendly message)."""
+    msg = str(exc).lower()
+    name = type(exc).__name__
+
+    if any(kw in msg for kw in ("429", "rate limit", "quota", "resource exhausted", "resourceexhausted")):
+        return 429, "Rate limit reached. All Gemini API keys are busy — wait a moment and try again."
+
+    if any(kw in msg for kw in ("api key", "invalid key", "api_key_invalid", "unauthenticated", "permission denied")):
+        return 401, "Invalid or missing API key. Check your .env file."
+
+    if any(kw in msg for kw in ("timeout", "timed out", "deadline exceeded")):
+        return 504, "The AI service timed out. Try again in a moment."
+
+    if any(kw in msg for kw in ("connection", "network", "unreachable")):
+        return 503, "Cannot reach the AI service. Check your internet connection."
+
+    if any(kw in msg for kw in ("no module", "import")):
+        return 500, f"Missing dependency ({name}). Run pip install -r requirements.txt."
+
+    return 500, f"{name}: {exc}"
+
+
+def _raise(exc: Exception):
+    """Log full traceback and raise a classified HTTPException."""
+    logger.error(traceback.format_exc())
+    status, message = _classify_error(exc)
+    raise HTTPException(status_code=status, detail=message)
+
+
+# ── Health ────────────────────────────────────────────────────────────────────
+
 @app.get("/")
 def health_check():
     return {"status": "ok", "service": "Job Copilot API"}
 
 
-# ── Resume endpoints ──
+# ── Resume ────────────────────────────────────────────────────────────────────
 
 class ResumeRequest(BaseModel):
     resume_text: str
@@ -41,7 +87,6 @@ class ResumeRequest(BaseModel):
 
 @app.post("/resume/text")
 async def upload_resume_text(request: ResumeRequest):
-    """Save resume from pasted text."""
     if not request.resume_text.strip():
         raise HTTPException(status_code=400, detail="Resume text cannot be empty")
     data = save_resume(request.resume_text.strip())
@@ -50,29 +95,18 @@ async def upload_resume_text(request: ResumeRequest):
 
 @app.post("/resume/upload")
 async def upload_resume_pdf(file: UploadFile = File(...)):
-    """Upload a resume PDF — extracts text and saves it."""
-
     if not file.filename.lower().endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Only PDF files are supported")
-
     try:
         contents = await file.read()
         reader = PdfReader(io.BytesIO(contents))
-
-        text_parts = []
-        for page in reader.pages:
-            page_text = page.extract_text()
-            if page_text:
-                text_parts.append(page_text)
-
+        text_parts = [p for page in reader.pages if (p := page.extract_text())]
         resume_text = "\n".join(text_parts).strip()
-
         if not resume_text:
             raise HTTPException(
                 status_code=400,
                 detail="Could not extract text from this PDF. Try pasting your resume text instead.",
             )
-
         data = save_resume(resume_text)
         return {
             "status": "saved",
@@ -81,16 +115,14 @@ async def upload_resume_pdf(file: UploadFile = File(...)):
             "characters_extracted": len(resume_text),
             "preview": resume_text[:200] + "..." if len(resume_text) > 200 else resume_text,
         }
-
     except HTTPException:
         raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error processing PDF: {str(e)}")
+    except Exception as exc:
+        _raise(exc)
 
 
 @app.get("/resume")
 async def fetch_resume():
-    """Get the currently saved resume."""
     resume = get_resume()
     if resume is None:
         return {"status": "not_found", "resume_text": None}
@@ -99,12 +131,11 @@ async def fetch_resume():
 
 @app.delete("/resume")
 async def remove_resume():
-    """Delete the saved resume."""
     deleted = delete_resume()
     return {"status": "deleted" if deleted else "not_found"}
 
 
-# ── Preferences endpoints ──
+# ── Preferences ───────────────────────────────────────────────────────────────
 
 class PreferencesRequest(BaseModel):
     job_types: list[str] = ["internship"]
@@ -118,52 +149,42 @@ class PreferencesRequest(BaseModel):
 
 @app.post("/preferences")
 async def update_preferences(request: PreferencesRequest):
-    """Save job search preferences."""
     data = save_preferences(request.model_dump())
     return {"status": "saved", "updated_at": data["updated_at"]}
 
 
 @app.get("/preferences")
 async def fetch_preferences():
-    """Get current job search preferences."""
     prefs = get_preferences()
     return {"status": "found", "preferences": prefs}
 
 
 @app.delete("/preferences")
 async def remove_preferences():
-    """Reset preferences to defaults."""
     deleted = delete_preferences()
     return {"status": "reset" if deleted else "already_default"}
 
 
-# ── Analysis endpoint ──
+# ── Analysis ──────────────────────────────────────────────────────────────────
 
 @app.post("/analyze")
 async def analyze_job(request: AnalyzeRequest):
-    """Main endpoint — takes scraped job data, runs the full pipeline,
-    returns analysis with recommendation, skill matches, and more."""
-
     start_time = time.time()
 
-    # Auto-load saved resume if none provided in request
     resume_text = request.resume or ""
     if not resume_text:
-        saved_resume = get_resume()
-        if saved_resume:
-            resume_text = saved_resume
+        saved = get_resume()
+        if saved:
+            resume_text = saved
 
     if not resume_text:
         raise HTTPException(
             status_code=400,
-            detail="No resume found. Please save your resume first via the Resume panel in the extension.",
+            detail="No resume found. Save your resume first via the Resume panel.",
         )
 
     try:
-        # Load user preferences
         preferences = get_preferences()
-
-        # Build initial state for the pipeline
         initial_state = {
             "platform": request.platform,
             "url": request.url,
@@ -172,13 +193,14 @@ async def analyze_job(request: AnalyzeRequest):
             "preferences": preferences,
         }
 
-        # Run the LangGraph pipeline
         result = pipeline.invoke(initial_state)
-
         elapsed = round(time.time() - start_time, 2)
-
-        # Format response for the Chrome extension
         parsed_job = result.get("parsed_job", {})
+
+        # Surface any pipeline-level error as a warning (not a hard failure)
+        pipeline_warning = result.get("error")
+        if pipeline_warning:
+            logger.warning(f"[Pipeline] Partial failure: {pipeline_warning}")
 
         return {
             "matchScore": result.get("match_score", 50),
@@ -202,17 +224,17 @@ async def analyze_job(request: AnalyzeRequest):
             "meta": {
                 "elapsed_seconds": elapsed,
                 "platform": request.platform,
-                "error": result.get("error"),
+                "pipelineWarning": pipeline_warning,
             },
         }
 
     except HTTPException:
         raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    except Exception as exc:
+        _raise(exc)
 
 
-# ── Save to Sheets endpoint ──
+# ── Save to Sheets ────────────────────────────────────────────────────────────
 
 class SaveToSheetsRequest(BaseModel):
     company: str = ""
@@ -230,8 +252,6 @@ class SaveToSheetsRequest(BaseModel):
 
 @app.post("/save-to-sheets")
 async def save_to_sheets(request: SaveToSheetsRequest):
-    """Append the applied job to the user's Google Sheets tracker."""
-    import traceback
     try:
         row = save_application(
             company=request.company,
@@ -247,20 +267,12 @@ async def save_to_sheets(request: SaveToSheetsRequest):
             visa_sponsorship=request.visa_sponsorship,
         )
         return {"status": "saved", "row": row}
-    except RuntimeError as e:
-        raise HTTPException(status_code=503, detail=str(e))
-    except Exception as e:
-        tb = traceback.format_exc()
-        print(f"[SHEETS ERROR]\n{tb}")
-        raise HTTPException(status_code=500, detail=f"Google Sheets error: {type(e).__name__}: {e}")
+    except HTTPException:
+        raise
+    except Exception as exc:
+        _raise(exc)
 
 
 if __name__ == "__main__":
     import uvicorn
-
-    uvicorn.run(
-        "main:app",
-        host=settings.HOST,
-        port=settings.PORT,
-        reload=settings.DEBUG,
-    )
+    uvicorn.run("main:app", host=settings.HOST, port=settings.PORT, reload=settings.DEBUG)

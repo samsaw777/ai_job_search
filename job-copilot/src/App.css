@@ -790,6 +790,23 @@ body {
 }
 
 /* ================================
+   PIPELINE WARNING BANNER
+   ================================ */
+.pipeline-warning {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 10px 16px 0;
+  padding: 8px 12px;
+  background: rgba(240, 165, 53, 0.08);
+  border: 1px solid rgba(240, 165, 53, 0.25);
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  color: var(--orange);
+  line-height: 1.4;
+}
+
+/* ================================
    SAVE TO SHEETS
    ================================ */
 .save-to-sheets-section {
