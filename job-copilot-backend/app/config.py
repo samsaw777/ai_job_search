@@ -21,6 +21,10 @@ class Settings(BaseSettings):
     LANGCHAIN_PROJECT: str = "job-copilot"
     LANGCHAIN_ENDPOINT: str = "https://api.smith.langchain.com"
 
+    # ── Google Sheets ──
+    GOOGLE_SERVICE_ACCOUNT_PATH: str = ""  # path to service account JSON key file
+    GOOGLE_SHEETS_SPREADSHEET_ID: str = ""  # ID from the spreadsheet URL
+
     # ── App ──
     APP_NAME: str = "Job Copilot API"
     APP_VERSION: str = "1.0.0"

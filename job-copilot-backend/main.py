@@ -8,6 +8,7 @@ from app.config import get_settings
 from app.models.schemas import AnalyzeRequest
 from app.pipeline import pipeline
 from app.resume_store import save_resume, get_resume, delete_resume, save_preferences, get_preferences, delete_preferences
+from app.sheets_client import save_application
 
 settings = get_settings()
 
@@ -209,6 +210,49 @@ async def analyze_job(request: AnalyzeRequest):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# ── Save to Sheets endpoint ──
+
+class SaveToSheetsRequest(BaseModel):
+    company: str = ""
+    role: str = ""
+    location: str = ""
+    job_url: str = ""
+    key_requirements: list[str] = []
+    salary_range: str = ""
+    visa_sponsorship: str = "Unknown"
+    ats_score: int = 0
+    resume_version: str = "Default"
+    status: str = "Applied"
+    notes: str = ""
+
+
+@app.post("/save-to-sheets")
+async def save_to_sheets(request: SaveToSheetsRequest):
+    """Append the applied job to the user's Google Sheets tracker."""
+    import traceback
+    try:
+        row = save_application(
+            company=request.company,
+            role=request.role,
+            location=request.location,
+            job_url=request.job_url,
+            key_requirements=request.key_requirements,
+            salary_range=request.salary_range,
+            ats_score=request.ats_score,
+            resume_version=request.resume_version,
+            status=request.status,
+            notes=request.notes,
+            visa_sponsorship=request.visa_sponsorship,
+        )
+        return {"status": "saved", "row": row}
+    except RuntimeError as e:
+        raise HTTPException(status_code=503, detail=str(e))
+    except Exception as e:
+        tb = traceback.format_exc()
+        print(f"[SHEETS ERROR]\n{tb}")
+        raise HTTPException(status_code=500, detail=f"Google Sheets error: {type(e).__name__}: {e}")
 
 
 if __name__ == "__main__":
