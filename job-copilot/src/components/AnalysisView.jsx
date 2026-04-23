@@ -32,10 +32,39 @@ const SKILL_STATUS_CONFIG = {
   missing: { label: "Missing", color: "var(--red)", icon: "✕" },
 };
 
-export default function AnalysisView({ analysis, scrapedData, onBack }) {
+export default function AnalysisView({ analysis, scrapedData, onBack, onSaveToSheets }) {
   const [activeTab, setActiveTab] = useState("overview");
+  const [notes, setNotes] = useState("");
+  const [saveState, setSaveState] = useState("idle"); // idle | saving | saved | error
+  const [saveError, setSaveError] = useState("");
 
   if (!analysis) return null;
+
+  const handleSave = async () => {
+    setSaveState("saving");
+    setSaveError("");
+    try {
+      await onSaveToSheets({
+        company: analysis.parsedJob?.company || "",
+        role: analysis.parsedJob?.title || "",
+        location: analysis.parsedJob?.location || "",
+        job_url: scrapedData?.url || "",
+        key_requirements: analysis.skillMatches
+          ?.filter((s) => s.status === "match" || s.status === "partial")
+          .map((s) => s.skill)
+          .slice(0, 5) || [],
+        salary_range: analysis.parsedJob?.compensation || "",
+        ats_score: analysis.matchScore || 0,
+        resume_version: "Default",
+        status: "Applied",
+        notes,
+      });
+      setSaveState("saved");
+    } catch (err) {
+      setSaveError(err.message || "Failed to save");
+      setSaveState("error");
+    }
+  };
 
   const config =
     RECOMMENDATION_CONFIG[analysis.recommendation] ||
@@ -315,6 +344,54 @@ export default function AnalysisView({ analysis, scrapedData, onBack }) {
               Rewrite Bullet Points
             </button>
           </div>
+        )}
+      </div>
+
+      {/* Apply & Save to Sheets */}
+      <div className="save-to-sheets-section">
+        <h4 className="save-section-title">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <rect x="1" y="1" width="12" height="12" rx="2" stroke="currentColor" strokeWidth="1.4" />
+            <path d="M4 7H10M4 4.5H10M4 9.5H7.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+          </svg>
+          Apply &amp; Log to Google Sheets
+        </h4>
+        <textarea
+          className="notes-input"
+          placeholder="Optional notes (e.g. referred by John, heard back in 2 days…)"
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          rows={2}
+          disabled={saveState === "saving" || saveState === "saved"}
+        />
+        {saveState === "saved" ? (
+          <div className="save-success">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M2.5 7L5.5 10L11.5 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            Saved to your tracker!
+          </div>
+        ) : (
+          <button
+            className="btn-save-sheets"
+            onClick={handleSave}
+            disabled={saveState === "saving"}
+          >
+            {saveState === "saving" ? (
+              "Saving…"
+            ) : (
+              <>
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <path d="M7 1v8M4 6l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M1 10v2a1 1 0 001 1h10a1 1 0 001-1v-2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                </svg>
+                Applied — Save to Sheets
+              </>
+            )}
+          </button>
+        )}
+        {saveState === "error" && (
+          <p className="save-error">{saveError}</p>
         )}
       </div>
     </div>

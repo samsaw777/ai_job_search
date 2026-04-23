@@ -1,2 +1,9 @@
 job-copilot/node_modules
 job-copilot-backend/.env
+job-copilot-backend/service_account.json
+
+# Python bytecode
+__pycache__/
+*.pyc
+*.pyo
+*.pyd

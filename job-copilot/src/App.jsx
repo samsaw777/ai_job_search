@@ -140,6 +140,19 @@ function App() {
     }
   };
 
+  const saveToSheets = async (payload) => {
+    const response = await fetch(`${BACKEND_URL}/save-to-sheets`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.detail || "Failed to save to Google Sheets");
+    }
+    return response.json();
+  };
+
   const getMockData = () => ({
     platform: "linkedin",
     url: "https://linkedin.com/jobs/view/demo",
@@ -182,6 +195,7 @@ function App() {
             analysis={analysis}
             scrapedData={scrapedData}
             onBack={() => setCurrentView("main")}
+            onSaveToSheets={saveToSheets}
           />
         )}
 
