@@ -6,15 +6,40 @@ import ResumePanel from "./components/ResumePanel";
 import PreferencesPanel from "./components/PreferencesPanel";
 import SettingsPanel from "./components/SettingsPanel";
 import StatusBar from "./components/StatusBar";
+import { loadHistory, saveToHistory } from "./storage";
 import "./App.css";
 
+const BACKEND_URL = "http://localhost:8000";
+
+function timeAgo(iso) {
+  const diff = Date.now() - new Date(iso).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return "just now";
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  return `${Math.floor(h / 24)}d ago`;
+}
+
+function scoreColor(score) {
+  if (score >= 70) return "var(--green)";
+  if (score >= 40) return "var(--orange)";
+  return "var(--red)";
+}
+
 function App() {
-  const [currentView, setCurrentView] = useState("main"); // main | analysis | resume | settings
+  const [currentView, setCurrentView] = useState("main");
   const [scrapedData, setScrapedData] = useState(null);
   const [analysis, setAnalysis] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [platform, setPlatform] = useState(null);
+  const [history, setHistory] = useState([]);
+
+  // Load analysis history from chrome.storage on mount
+  useEffect(() => {
+    loadHistory().then(setHistory);
+  }, []);
 
   // Detect platform from active tab URL
   const detectPlatform = useCallback(() => {
@@ -31,24 +56,18 @@ function App() {
     }
   }, []);
 
-  // Detect on mount
   useEffect(() => {
     detectPlatform();
   }, [detectPlatform]);
 
-  // Re-detect when user switches tabs (side panel stays open!)
   useEffect(() => {
     if (typeof chrome !== "undefined" && chrome.tabs) {
-      const handleTabChange = () => {
-        detectPlatform();
-      };
+      const handleTabChange = () => detectPlatform();
       chrome.tabs.onActivated.addListener(handleTabChange);
       chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
         if (changeInfo.status === "complete") handleTabChange();
       });
-      return () => {
-        chrome.tabs.onActivated.removeListener(handleTabChange);
-      };
+      return () => chrome.tabs.onActivated.removeListener(handleTabChange);
     }
   }, [detectPlatform]);
 
@@ -58,45 +77,35 @@ function App() {
 
     try {
       if (typeof chrome !== "undefined" && chrome.runtime) {
-        // Side panel communicates through the background script
-        chrome.runtime.sendMessage(
-          { action: "scrapeFromSidePanel" },
-          (response) => {
-            if (chrome.runtime.lastError) {
-              setError(
-                "Could not read this page. Make sure you're on a job listing.",
-              );
-              setIsLoading(false);
-              return;
-            }
-            if (response?.error) {
-              setError(response.error);
-              setIsLoading(false);
-              return;
-            }
-            if (response) {
-              setScrapedData(response);
-              analyzeWithBackend(response);
-            } else {
-              setError("No job listing found on this page.");
-              setIsLoading(false);
-            }
-          },
-        );
+        chrome.runtime.sendMessage({ action: "scrapeFromSidePanel" }, (response) => {
+          if (chrome.runtime.lastError) {
+            setError("Could not read this page. Make sure you're on a job listing.");
+            setIsLoading(false);
+            return;
+          }
+          if (response?.error) {
+            setError(response.error);
+            setIsLoading(false);
+            return;
+          }
+          if (response) {
+            setScrapedData(response);
+            analyzeWithBackend(response);
+          } else {
+            setError("No job listing found on this page.");
+            setIsLoading(false);
+          }
+        });
       } else {
-        // Demo mode — use mock data
         const mockData = getMockData();
         setScrapedData(mockData);
         analyzeWithBackend(mockData);
       }
-    } catch (err) {
+    } catch {
       setError("Something went wrong. Try again.");
       setIsLoading(false);
     }
   };
-
-  // Backend API URL — matches your FastAPI server
-  const BACKEND_URL = "http://localhost:8000";
 
   const analyzeWithBackend = async (data) => {
     try {
@@ -114,13 +123,12 @@ function App() {
 
       if (!response.ok) {
         const body = await response.json().catch(() => ({}));
-        const msg = body.detail || "Something went wrong. Try again.";
-        throw new Error(msg);
+        throw new Error(body.detail || "Something went wrong. Try again.");
       }
 
       const result = await response.json();
 
-      setAnalysis({
+      const newAnalysis = {
         matchScore: result.matchScore,
         recommendation: result.recommendation,
         recommendationLabel: result.recommendationLabel,
@@ -133,13 +141,25 @@ function App() {
         outreachSearchQueries: result.outreachSearchQueries || [],
         parsedJob: result.parsedJob || {},
         pipelineWarning: result.meta?.pipelineWarning || null,
-      });
+      };
+
+      setAnalysis(newAnalysis);
+
+      // Persist to chrome.storage (last 5)
+      saveToHistory(newAnalysis, data).then(setHistory);
+
       setCurrentView("analysis");
       setIsLoading(false);
     } catch (err) {
       setError(err.message);
       setIsLoading(false);
     }
+  };
+
+  const restoreFromHistory = (item) => {
+    setAnalysis(item.analysis);
+    setScrapedData(item.scrapedData);
+    setCurrentView("analysis");
   };
 
   const saveToSheets = async (payload) => {
@@ -180,7 +200,9 @@ function App() {
               platform={platform}
               hasData={!!scrapedData}
             />
+
             {error && <div className="error-toast">{error}</div>}
+
             {scrapedData && !isLoading && (
               <button
                 className="btn-view-analysis"
@@ -188,6 +210,35 @@ function App() {
               >
                 View Last Analysis →
               </button>
+            )}
+
+            {history.length > 0 && (
+              <div className="history-section">
+                <h4 className="history-title">Recent</h4>
+                {history.map((item) => (
+                  <button
+                    key={item.id}
+                    className="history-item"
+                    onClick={() => restoreFromHistory(item)}
+                  >
+                    <span
+                      className="history-score"
+                      style={{ color: scoreColor(item.analysis.matchScore) }}
+                    >
+                      {item.analysis.matchScore}
+                    </span>
+                    <div className="history-info">
+                      <span className="history-company">
+                        {item.analysis.parsedJob?.company || "Unknown Company"}
+                      </span>
+                      <span className="history-role">
+                        {item.analysis.parsedJob?.title || "Unknown Role"}
+                      </span>
+                    </div>
+                    <span className="history-time">{timeAgo(item.savedAt)}</span>
+                  </button>
+                ))}
+              </div>
             )}
           </div>
         )}
