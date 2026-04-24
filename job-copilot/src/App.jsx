@@ -139,6 +139,11 @@ function App() {
         coldEmailDraft: result.coldEmailDraft || "",
         rewrittenBullets: result.rewrittenBullets || [],
         outreachSearchQueries: result.outreachSearchQueries || [],
+        emailPrompt: result.emailPrompt || '',
+        linkedinPrompt: result.linkedinPrompt || '',
+        atsKeywordScore: result.atsKeywordScore ?? -1,
+        atsMissingKeywords: result.atsMissingKeywords || [],
+        atsProfileSuggestions: result.atsProfileSuggestions || [],
         parsedJob: result.parsedJob || {},
         pipelineWarning: result.meta?.pipelineWarning || null,
       };

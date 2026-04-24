@@ -3,9 +3,10 @@ import re
 from langchain_core.messages import HumanMessage, SystemMessage
 from app.llm_providers import get_gemini_llm
 from app.models.schemas import PipelineState
+from app.profile_loader import load_profile, format_profile_for_prompt
 
 
-MATCH_SYSTEM_PROMPT = """You are a job match analyzer. Given a parsed job listing, a candidate's resume, and their job search preferences, analyze the fit.
+MATCH_SYSTEM_PROMPT = """You are a job match analyzer. Given a parsed job listing and a candidate's COMPLETE PROFESSIONAL PROFILE (skills, all experience, all projects, education, blogs) along with their job search preferences, analyze the fit.
 
 You MUST respond with ONLY a valid JSON object, nothing else. No markdown, no backticks, no explanation before or after.
 
@@ -24,7 +25,7 @@ IMPORTANT: Factor in the candidate's preferences:
 - If the role location doesn't match preferred locations and candidate is not open to remote, score LOWER.
 - If the role aligns perfectly with target roles and job type preferences, score HIGHER.
 
-For skill_matches status: "match" = has it, "partial" = related experience, "missing" = not found.
+For skill_matches status: "match" = has it, "partial" = related experience, "missing" = not found. The candidate has many projects and experiences — check ALL of them for relevant skills, not just job titles. A skill found in any project, experience bullet, blog, or coursework counts as a match or partial match.
 
 For resume_gaps: give specific, actionable suggestions.
 
@@ -59,21 +60,28 @@ def extract_json(text: str) -> dict:
 
 
 def match_profile(state: dict) -> dict:
-    """Node 2: Compare job requirements against resume using Gemini."""
+    """Node 2: Compare job requirements against the candidate's full profile using Gemini."""
     try:
         llm = get_gemini_llm(temperature=0)
 
         parsed_job = state.get("parsed_job", {})
         resume = state.get("resume_text", "")
 
-        if not resume:
+        profile = load_profile()
+        if profile:
+            candidate_block = format_profile_for_prompt(profile)
+            candidate_header = "CANDIDATE COMPLETE PROFESSIONAL PROFILE"
+        elif resume:
+            candidate_block = resume
+            candidate_header = "CANDIDATE RESUME"
+        else:
             return {
                 **state,
-                "error": "No resume provided",
+                "error": "No resume or profile provided",
                 "match_score": 0,
                 "skill_matches": [],
                 "resume_gaps": ["Please save your resume in the Resume panel first."],
-                "reasoning": "Cannot analyze match without a resume.",
+                "reasoning": "Cannot analyze match without a resume or profile.",
             }
 
         job_summary = f"""
@@ -87,8 +95,8 @@ Experience Level: {parsed_job.get('experience_level', 'Unknown')}
 
         # Add preferences context
         preferences = state.get("preferences", {})
-        candidate_context = f"""CANDIDATE RESUME:
-{resume}
+        candidate_context = f"""{candidate_header}:
+{candidate_block}
 
 CANDIDATE PREFERENCES:
 Looking for: {', '.join(preferences.get('job_types', ['any']))}

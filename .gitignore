@@ -1,6 +1,7 @@
 job-copilot/node_modules
 job-copilot-backend/.env
 job-copilot-backend/service_account.json
+job-copilot-backend/data
 
 # Python bytecode
 __pycache__/

@@ -29,8 +29,18 @@ def rewrite_resume_bullets(state: dict) -> dict:
 
         parsed_job = state.get("parsed_job", {})
         resume_text = state.get("resume_text", "")
+        ats_profile_suggestions = state.get("ats_profile_suggestions", [])
 
         llm = get_openai_llm(temperature=0.7)
+
+        ats_block = ""
+        if ats_profile_suggestions:
+            ats_block = (
+                "\nATS ANALYSIS: The following keywords are missing from the resume. "
+                "For each, a specific project or experience from the candidate's profile "
+                "has been identified that could be added: "
+                f"{json.dumps(ats_profile_suggestions, indent=2)}\n"
+            )
 
         context = f"""
 Job Title: {parsed_job.get('title', 'Unknown')}
@@ -39,7 +49,7 @@ Required Skills: {', '.join(parsed_job.get('required_skills', []))}
 
 Resume Gaps Identified:
 {chr(10).join(f'- {gap}' for gap in resume_gaps)}
-
+{ats_block}
 Candidate's Current Resume:
 {resume_text[:2000] if resume_text else 'Not provided — suggest generic improvements based on the gaps.'}
 """

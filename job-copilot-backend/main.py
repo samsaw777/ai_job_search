@@ -6,7 +6,7 @@ import traceback
 from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from PyPDF2 import PdfReader
+from pypdf import PdfReader # type: ignore
 
 from app.config import get_settings
 from app.models.schemas import AnalyzeRequest
@@ -95,7 +95,7 @@ async def upload_resume_text(request: ResumeRequest):
 
 @app.post("/resume/upload")
 async def upload_resume_pdf(file: UploadFile = File(...)):
-    if not file.filename.lower().endswith(".pdf"):
+    if not file.filename.lower().endswith(".pdf"): # type: ignore
         raise HTTPException(status_code=400, detail="Only PDF files are supported")
     try:
         contents = await file.read()
@@ -213,6 +213,11 @@ async def analyze_job(request: AnalyzeRequest):
             "coldEmailDraft": result.get("cold_email_draft", ""),
             "rewrittenBullets": result.get("rewritten_bullets", []),
             "outreachSearchQueries": result.get("outreach_search_queries", []),
+            "emailPrompt": result.get("email_prompt", ""),
+            "linkedinPrompt": result.get("linkedin_prompt", ""),
+            "atsKeywordScore": result.get("ats_keyword_score", -1),
+            "atsMissingKeywords": result.get("ats_missing_keywords", []),
+            "atsProfileSuggestions": result.get("ats_profile_suggestions", []),
             "parsedJob": {
                 "title": parsed_job.get("title", ""),
                 "company": parsed_job.get("company", ""),
