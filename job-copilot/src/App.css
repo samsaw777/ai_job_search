@@ -1596,3 +1596,229 @@ body {
 .prefs-notes::placeholder {
   color: var(--text-muted);
 }
+
+.prompts-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 4px 0;
+}
+
+.prompt-card {
+  background: var(--surface-1, #f8f9fa);
+  border: 1px solid var(--border, #e2e5e9);
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.prompt-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.prompt-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-primary, #1a1a1a);
+}
+
+.prompt-title-row h4 {
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.prompt-title-row svg {
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.prompt-hint {
+  font-size: 12px;
+  color: var(--text-secondary, #6b7280);
+  margin: 0 0 10px 0;
+  line-height: 1.4;
+}
+
+.prompt-preview {
+  background: var(--surface-2, #eef0f3);
+  border: 1px solid var(--border, #e2e5e9);
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 11.5px;
+  line-height: 1.55;
+  color: var(--text-primary, #1a1a1a);
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 220px;
+  overflow-y: auto;
+  font-family: "SF Mono", "Fira Code", "Cascadia Code", "Consolas", monospace;
+  margin: 0;
+}
+
+.prompt-preview::-webkit-scrollbar {
+  width: 5px;
+}
+
+.prompt-preview::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.prompt-preview::-webkit-scrollbar-thumb {
+  background: var(--border, #d1d5db);
+  border-radius: 3px;
+}
+
+.btn-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-primary, #374151);
+  background: var(--surface-2, #e5e7eb);
+  border: 1px solid var(--border, #d1d5db);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.btn-copy:hover {
+  background: var(--surface-3, #d1d5db);
+  border-color: var(--border-hover, #9ca3af);
+}
+
+.btn-copy.copied {
+  color: var(--green, #16a34a);
+  background: var(--green-bg, #dcfce7);
+  border-color: var(--green, #16a34a);
+}
+
+.btn-copy svg {
+  flex-shrink: 0;
+}
+
+.ats-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 4px 0;
+}
+
+.ats-score-display {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px;
+  background: var(--surface-1, #f8f9fa);
+  border: 1px solid var(--border, #e2e5e9);
+  border-left: 4px solid var(--ats-color, var(--green));
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+
+.ats-score-number {
+  font-size: 34px;
+  font-weight: 700;
+  color: var(--ats-color, var(--green));
+  line-height: 1;
+}
+
+.ats-score-max {
+  font-size: 14px;
+  color: var(--text-secondary, #6b7280);
+  font-weight: 500;
+}
+
+.ats-score-label {
+  flex: 1 1 100%;
+  font-size: 12px;
+  color: var(--text-secondary, #6b7280);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-top: 2px;
+}
+
+.ats-subsection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ats-subtitle {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary, #1a1a1a);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.ats-keywords-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ats-keyword-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--red, #dc2626);
+  background: var(--red-bg, #fee2e2);
+  border: 1px solid var(--red, #dc2626);
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.ats-suggestions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ats-suggestion-card {
+  background: var(--surface-1, #f8f9fa);
+  border: 1px solid var(--border, #e2e5e9);
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ats-suggestion-tag {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--orange, #d97706);
+  background: var(--orange-bg, #fef3c7);
+  border: 1px solid var(--orange, #d97706);
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.ats-suggestion-text {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--text-primary, #1a1a1a);
+}
+
+.ats-suggestion-text strong {
+  color: var(--accent, #2563eb);
+  font-weight: 600;
+}

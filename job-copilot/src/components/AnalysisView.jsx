@@ -1,5 +1,71 @@
 import { useState } from "react";
 
+function CopyButton({ text, label }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    const value = text || "";
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(value);
+      } else {
+        const textarea = document.createElement("textarea");
+        textarea.value = value;
+        textarea.setAttribute("readonly", "");
+        textarea.style.position = "absolute";
+        textarea.style.left = "-9999px";
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textarea);
+      }
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      const textarea = document.createElement("textarea");
+      textarea.value = value;
+      textarea.setAttribute("readonly", "");
+      textarea.style.position = "absolute";
+      textarea.style.left = "-9999px";
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand("copy");
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } catch {
+        /* no-op */
+      }
+      document.body.removeChild(textarea);
+    }
+  };
+
+  return (
+    <button
+      className={`btn-copy${copied ? " copied" : ""}`}
+      onClick={handleCopy}
+      type="button"
+    >
+      {copied ? (
+        <>
+          <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
+            <path
+              d="M2.5 7L5.5 10L11.5 4"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          Copied!
+        </>
+      ) : (
+        label
+      )}
+    </button>
+  );
+}
+
 const RECOMMENDATION_CONFIG = {
   apply_only: {
     label: "Just Apply",
@@ -175,12 +241,28 @@ export default function AnalysisView({ analysis, scrapedData, onBack, onSaveToSh
         >
           Skills
         </button>
+        {analysis.atsKeywordScore >= 0 && (
+          <button
+            className={`tab ${activeTab === "ats" ? "active" : ""}`}
+            onClick={() => setActiveTab("ats")}
+          >
+            ATS Score
+          </button>
+        )}
         <button
           className={`tab ${activeTab === "outreach" ? "active" : ""}`}
           onClick={() => setActiveTab("outreach")}
         >
           Outreach
         </button>
+        {(analysis.emailPrompt || analysis.linkedinPrompt) && (
+          <button
+            className={`tab ${activeTab === "prompts" ? "active" : ""}`}
+            onClick={() => setActiveTab("prompts")}
+          >
+            Prompts
+          </button>
+        )}
         <button
           className={`tab ${activeTab === "resume" ? "active" : ""}`}
           onClick={() => setActiveTab("resume")}
@@ -213,6 +295,69 @@ export default function AnalysisView({ analysis, scrapedData, onBack, onSaveToSh
                 </div>
               );
             })}
+          </div>
+        )}
+
+        {activeTab === "ats" && (
+          <div className="ats-section">
+            <div
+              className="ats-score-display"
+              style={{
+                "--ats-color":
+                  analysis.atsKeywordScore >= 70
+                    ? "var(--green)"
+                    : analysis.atsKeywordScore >= 40
+                      ? "var(--orange)"
+                      : "var(--red)",
+              }}
+            >
+              <span className="ats-score-number">
+                {analysis.atsKeywordScore}
+              </span>
+              <span className="ats-score-max">/ 100</span>
+              <span className="ats-score-label">ATS Keyword Score</span>
+            </div>
+
+            {analysis.atsMissingKeywords &&
+              analysis.atsMissingKeywords.length > 0 && (
+                <div className="ats-subsection">
+                  <h4 className="ats-subtitle">Missing Keywords</h4>
+                  <div className="ats-keywords-list">
+                    {analysis.atsMissingKeywords.map((kw, i) => (
+                      <span key={i} className="ats-keyword-chip">
+                        {kw}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+            {analysis.atsProfileSuggestions &&
+              analysis.atsProfileSuggestions.length > 0 && (
+                <div className="ats-subsection">
+                  <h4 className="ats-subtitle">What to Add to Your Resume</h4>
+                  <div className="ats-suggestions-list">
+                    {analysis.atsProfileSuggestions.map((item, i) => (
+                      <div key={i} className="ats-suggestion-card">
+                        <span className="ats-suggestion-tag">
+                          {item.missing_keyword}
+                        </span>
+                        <p className="ats-suggestion-text">{item.suggestion}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+            {(!analysis.atsMissingKeywords ||
+              analysis.atsMissingKeywords.length === 0) &&
+              (!analysis.atsProfileSuggestions ||
+                analysis.atsProfileSuggestions.length === 0) && (
+                <p className="outreach-empty">
+                  No ATS gaps detected — your resume already covers the key
+                  keywords from this JD.
+                </p>
+              )}
           </div>
         )}
 
@@ -332,6 +477,91 @@ export default function AnalysisView({ analysis, scrapedData, onBack, onSaveToSh
               </svg>
               Draft Cold Email
             </button>
+          </div>
+        )}
+
+        {activeTab === "prompts" && (
+          <div className="prompts-section">
+            {!analysis.emailPrompt && !analysis.linkedinPrompt ? (
+              <p className="outreach-empty">
+                Prompts are only generated when the recommendation is Apply + Cold Email.
+              </p>
+            ) : (
+              <>
+                {analysis.emailPrompt && (
+                  <div className="prompt-card">
+                    <div className="prompt-header">
+                      <div className="prompt-title-row">
+                        <svg width="16" height="16" viewBox="0 0 14 14" fill="none">
+                          <rect
+                            x="1"
+                            y="2"
+                            width="12"
+                            height="10"
+                            rx="1.5"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                          />
+                          <path
+                            d="M1 3.5L7 7.5L13 3.5"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                        <h4>Cold Email Prompt</h4>
+                      </div>
+                      <CopyButton text={analysis.emailPrompt} label="Copy Prompt" />
+                    </div>
+                    <p className="prompt-hint">
+                      Copy this prompt and paste it into your preferred LLM to generate a personalized cold email.
+                    </p>
+                    <pre className="prompt-preview">{analysis.emailPrompt}</pre>
+                  </div>
+                )}
+
+                {analysis.linkedinPrompt && (
+                  <div className="prompt-card">
+                    <div className="prompt-header">
+                      <div className="prompt-title-row">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                          <rect
+                            x="1"
+                            y="1"
+                            width="14"
+                            height="14"
+                            rx="2"
+                            stroke="currentColor"
+                            strokeWidth="1.4"
+                          />
+                          <path
+                            d="M4.5 6.5V11.5"
+                            stroke="currentColor"
+                            strokeWidth="1.4"
+                            strokeLinecap="round"
+                          />
+                          <circle cx="4.5" cy="4.5" r="0.8" fill="currentColor" />
+                          <path
+                            d="M7.5 11.5V8.5C7.5 7.4 8.4 6.5 9.5 6.5C10.6 6.5 11.5 7.4 11.5 8.5V11.5"
+                            stroke="currentColor"
+                            strokeWidth="1.4"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                        <h4>LinkedIn Connection Prompt</h4>
+                      </div>
+                      <CopyButton text={analysis.linkedinPrompt} label="Copy Prompt" />
+                    </div>
+                    <p className="prompt-hint">
+                      Copy this prompt to generate a connection request message (300 char limit).
+                    </p>
+                    <pre className="prompt-preview">{analysis.linkedinPrompt}</pre>
+                  </div>
+                )}
+              </>
+            )}
           </div>
         )}
 
