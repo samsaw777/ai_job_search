@@ -41,66 +41,124 @@ def format_profile_for_prompt(profile: dict) -> str:
     """Format the full profile dict into a readable string for LLM context."""
     if not profile:
         return ""
-
     parts: list[str] = []
 
-    name = profile.get("name", "")
+    # Name: support legacy top-level `name` or new `header.introduction`
+    name = profile.get("name") or profile.get("header", {}).get("introduction")
     if name:
         parts.append(f"NAME: {name}")
 
-    seeking = profile.get("seeking", "")
+    # Seeking/availability: support either key
+    seeking = profile.get("seeking") or profile.get("availability") or profile.get("header", {}).get("summary")
     if seeking:
         parts.append(f"SEEKING: {seeking}")
 
-    skills = profile.get("skills", {}) or {}
-    if skills:
-        parts.append("\nSKILLS:")
-        for category in ("languages", "frameworks", "ai_and_ml", "databases", "tools", "cs_fundamentals"):
-            items = skills.get(category, [])
-            if items:
-                label = category.replace("_", " ").title()
-                parts.append(f"  {label}: {', '.join(items)}")
+    # Normalize skills: support both dict-form and list-of-categories form
+    skills_section = {}
+    raw_skills = profile.get("skills")
+    if isinstance(raw_skills, dict):
+        skills_section = raw_skills
+    elif isinstance(raw_skills, list):
+        # Convert [{category: 'Languages', skills: [...]}, ...] -> {languages: [...], ...}
+        for cat in raw_skills:
+            if not isinstance(cat, dict):
+                continue
+            key = cat.get("category") or cat.get("name")
+            if not key:
+                continue
+            normalized = key.lower().replace(" ", "_")
+            items = cat.get("skills") or []
+            # items may be list of dicts with `name`
+            normalized_items = []
+            for it in items:
+                if isinstance(it, dict):
+                    n = it.get("name")
+                    if n:
+                        normalized_items.append(n)
+                elif isinstance(it, str):
+                    normalized_items.append(it)
+            skills_section[normalized] = normalized_items
 
-    education = profile.get("education", []) or []
+    if skills_section:
+        parts.append("\nSKILLS:")
+        for category, items in skills_section.items():
+            if not items:
+                continue
+            label = category.replace("_", " ").title()
+            parts.append(f"  {label}: {', '.join(items)}")
+
+    # Education: support both legacy and new shapes
+    education = profile.get("education") or []
     if education:
         parts.append("\nEDUCATION:")
         for edu in education:
-            degree = edu.get("degree", "")
-            university = edu.get("university", "")
+            degree = edu.get("degree") or edu.get("subject") or edu.get("degree")
+            university = edu.get("university") or edu.get("institution")
             location = edu.get("location", "")
-            parts.append(f"  - {degree}, {university} ({location})")
-            coursework = edu.get("coursework", [])
+            if degree or university:
+                parts.append(f"  - {degree}, {university} ({location})")
+            coursework = edu.get("coursework") or []
             if coursework:
                 parts.append(f"    Coursework: {', '.join(coursework)}")
 
-    experience = profile.get("experience", []) or []
+    # Experience: accept either legacy keys or new keys
+    experience = profile.get("experience") or []
     if experience:
         parts.append("\nEXPERIENCE:")
         for exp in experience:
-            title = exp.get("title", "")
-            company = exp.get("company", "")
-            duration = exp.get("duration", "")
-            parts.append(f"\n  {title} at {company} ({duration})")
-            for h in exp.get("highlights", []):
-                parts.append(f"    - {h}")
-            skills_used = exp.get("skills_used", [])
-            if skills_used:
-                parts.append(f"    Skills used: {', '.join(skills_used)}")
+            title = exp.get("title") or exp.get("position") or exp.get("role")
+            company = exp.get("company") or exp.get("employer")
+            duration = exp.get("duration") or (
+                f"{exp.get('startDate', '')} – {exp.get('endDate', '')}".strip(' – ')
+            )
+            header_line = ""
+            if title or company or duration:
+                header_line = f"\n  {title or ''} at {company or ''} ({duration or ''})"
+                parts.append(header_line)
 
-    projects = profile.get("projects", []) or []
+            # Highlights: either list or single description
+            highlights = exp.get("highlights") or []
+            if not highlights:
+                desc = exp.get("description") or exp.get("summary")
+                if isinstance(desc, str) and desc:
+                    highlights = [desc]
+            for h in highlights:
+                parts.append(f"    - {h}")
+
+            skills_used = exp.get("skills_used") or exp.get("skills") or []
+            # If skills_used is list of strings or dicts, normalize
+            normalized_skills_used = []
+            for s in skills_used:
+                if isinstance(s, dict):
+                    n = s.get("name")
+                    if n:
+                        normalized_skills_used.append(n)
+                elif isinstance(s, str):
+                    normalized_skills_used.append(s)
+            if normalized_skills_used:
+                parts.append(f"    Skills used: {', '.join(normalized_skills_used)}")
+
+    # Projects: support legacy and new shapes
+    projects = profile.get("projects") or []
     if projects:
         parts.append("\nPROJECTS:")
         for proj in projects:
-            pname = proj.get("name", "")
-            tech = proj.get("tech", "")
-            date = proj.get("date", "")
-            parts.append(f"\n  {pname} ({date})")
+            pname = proj.get("name")
+            date = proj.get("date") or proj.get("year")
+            parts.append(f"\n  {pname or ''} ({date or ''})")
+            tech = proj.get("tech") or (', '.join(proj.get("skills", [])) if proj.get("skills") else "")
             if tech:
                 parts.append(f"    Tech: {tech}")
-            for h in proj.get("highlights", []):
+            highlights = proj.get("highlights") or []
+            if not highlights:
+                desc = proj.get("description")
+                if isinstance(desc, str) and desc:
+                    highlights = [desc]
+            for h in highlights:
                 parts.append(f"    - {h}")
 
-    blogs = profile.get("blogs", []) or []
+    # Blogs (optional)
+    blogs = profile.get("blogs") or []
     if blogs:
         parts.append("\nBLOGS:")
         for blog in blogs:
