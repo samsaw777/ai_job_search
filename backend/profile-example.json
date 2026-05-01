@@ -1,0 +1,276 @@
+{
+  "header": {
+    "image": "images/profile.jpg",
+    "introduction": "Rushikesh Wani",
+    "position": "Full Stack Developer",
+    "summary": "MS Computer Science (4.0 GPA) at Northeastern University, graduating May 2027. Former Software Engineer @WebMD, where I optimized Medscape.com (10M+ users) achieving 20% traffic uplift and 1.2s latency reduction. Actively seeking SDE internships from May 2026 to December 2026. Full-Stack expertise: MERN Stack, Vue.js, Node.js, C++. Learning: Generative AI, Machine Learning, AWS Cloud Architecture.",
+    "contacts": [
+      {
+        "type": "email",
+        "label": "Email",
+        "value": "rushikeshwani36@gmail.com",
+        "href": "mailto:rushikeshwani36@gmail.com"
+      },
+      {
+        "type": "phone",
+        "label": "Phone",
+        "value": "+1 (857) 294-2662",
+        "href": "tel:+18572942662"
+      }
+    ]
+  },
+
+  "location": "🇺🇸 United States of America",
+  "menu": [
+    {"isActive": false, "section": "about"},
+    {"isActive": false, "section": "experience"},
+    {"isActive": false, "section": "education"},
+    {"isActive": false, "section": "skills"},
+    {"isActive": false, "section": "achievements"},
+    {"isActive": false, "section": "projects"}
+  ],
+  "education": [
+    {
+      "subject": "Computer Science",
+      "degree": "MS",
+      "university": "Northeastern University",
+      "location": "Boston, MA",
+      "gpa": "4.00",
+      "startDate": "Sep 2025",
+      "expectedGraduation": "May 2027",
+      "coursework": ["Programming Design Paradigm", "Web Development", "Algorithms", "Database Management"]
+    },
+    {
+      "subject": "Computer Engineering",
+      "degree": "B.E.",
+      "university": "University of Mumbai",
+      "location": "Mumbai, India",
+      "gpa": "3.75",
+      "startDate": "Aug 2018",
+      "graduationDate": "May 2022"
+    }
+  ],
+  "experience": [
+    {
+      "position": "Software Engineer",
+      "prevPositions": [],
+      "company": "WebMD",
+      "startDate": "Sep 2022",
+      "endDate": "Aug 2025",
+      "description": "Led migration of Medscape.com (10M+ monthly users) from Vue 2 to Vue 3, reducing bundle size by 35% and improving page load latency by 1.2 seconds. Implemented SSR optimization and CSS-in-JS architecture. Built healthcare platform with 8-person team; created reusable Vue.js component library.",
+      "skills": ["Vue.js", "Vue 3", "JavaScript", "Performance Optimization", "SSR", "Node.js"],
+      "mainLink": "https://www.webmd.com/",
+      "sideLinks": []
+    },
+    {
+      "position": "Software Engineer Intern",
+      "company": "WebMD",
+      "startDate": "Jun 2022",
+      "endDate": "Aug 2022",
+      "description": "Developed custom team management dashboard using JIRA RESTful APIs, streamlining resource tracking and role distribution. Accelerated Vue 3 migration by resolving critical legacy bugs and optimizing CI/CD pipelines, ensuring stability for early-stage feature releases.",
+      "skills": ["Vue.js", "JavaScript", "JIRA API", "CI/CD", "REST APIs"],
+      "mainLink": "https://www.webmd.com/"
+    },
+    {
+      "position": "Freelance Web Developer",
+      "company": "Self Employed - Various Clients",
+      "startDate": "Feb 2020",
+      "endDate": "May 2022",
+      "description": "Engineered custom billing and receipt generation system featuring dynamic PDF printing and template customization. Automated data reporting pipelines using CRON jobs and Google Sheets API to synchronize database records in real-time, eliminating manual data entry.",
+      "skills": ["Node.js", "Express.js", "PDF Generation", "Google Sheets API", "CRON", "MongoDB"],
+      "mainLink": ""
+    }
+  ],
+  "skills": [
+    {
+      "category": "Languages",
+      "skills": [
+        { "name": "C/C++", "icon": "SiC", "iconSet": "si" },
+        { "name": "JavaScript", "icon": "SiJavascript", "iconSet": "si" },
+        { "name": "TypeScript", "icon": "SiTypescript", "iconSet": "si" },
+        { "name": "Java", "icon": "FaJava", "iconSet": "fa" },
+        { "name": "Python", "icon": "SiPython", "iconSet": "si" },
+        { "name": "HTML5", "icon": "SiHtml5", "iconSet": "si" },
+        { "name": "CSS3", "icon": "SiCss3", "iconSet": "si" }
+      ]
+    },
+    {
+      "category": "Frameworks",
+      "skills": [
+        { "name": "Node.js", "icon": "SiNodedotjs", "iconSet": "si" },
+        { "name": "Express.js", "icon": "SiExpress", "iconSet": "si" },
+        { "name": "Vue.js", "icon": "SiVuedotjs", "iconSet": "si" },
+        { "name": "React.js", "icon": "SiReact", "iconSet": "si" },
+        { "name": "Next.js", "icon": "SiNextdotjs", "iconSet": "si" },
+        { "name": "Bootstrap", "icon": "SiBootstrap", "iconSet": "si" },
+        { "name": "FastAPI", "icon": "SiFastapi", "iconSet": "si" }
+      ]
+    },
+    {
+      "category": "Databases",
+      "skills": [
+        { "name": "MongoDB", "icon": "SiMongodb", "iconSet": "si" },
+        { "name": "Firestore", "icon": "SiFirebase", "iconSet": "si" },
+        { "name": "SQL", "icon": "SiMysql", "iconSet": "si" },
+        { "name": "PostgreSQL", "icon": "SiPostgresql", "iconSet": "si" }
+      ]
+    },
+    {
+      "category": "Developer Tools",
+      "skills": [
+        { "name": "Git", "icon": "SiGit", "iconSet": "si" },
+        { "name": "Docker", "icon": "SiDocker", "iconSet": "si" },
+        { "name": "Firebase", "icon": "SiFirebase", "iconSet": "si" },
+        { "name": "Webpack", "icon": "SiWebpack", "iconSet": "si" },
+        { "name": "VS Code", "icon": "VscCode", "iconSet": "vsc" },
+        { "name": "IntelliJ", "icon": "SiIntellijidea", "iconSet": "si" },
+        { "name": "GitHub", "icon": "SiGithub", "iconSet": "si" }
+      ]
+    },
+    {
+      "category": "CS Fundamentals",
+      "skills": [
+        { "name": "Data Structures & Algorithms", "icon": "none" },
+        { "name": "Object-Oriented Programming", "icon": "none" },
+        { "name": "REST APIs", "icon": "none" },
+        { "name": "System Design", "icon": "none" },
+        { "name": "Microservices", "icon": "none" }
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "name": "Amazon Review Sentiment Analyzer",
+      "year": "2025",
+      "madeAt": "Self",
+      "flagship": true,
+      "image": "images/amazon_sentiment.png",
+      "description": "• Advanced Chrome extension (Manifest V3) for Amazon product sentiment analysis\n• Multi-page scraping with persistent local storage and caching\n• AI-powered NLP using FastAPI backend, LangChain, and OpenAI APIs\n• Real-time sentiment detection and aggregation across review pages\n• Visual insights dashboard with sentiment metrics and trends\n• Docker containerization for scalable deployment\n• Secure credential handling and privacy-first architecture",
+      "skills": ["Chrome Extension", "FastAPI", "LangChain", "OpenAI", "Sentiment Analysis", "Machine Learning", "Web Scraping", "React", "Docker", "Python"],
+      "mainLink": "https://github.com/Rushikesh36/amazon-review-sentiment-analyzer",
+      "sideLinks": []
+    },
+    {
+      "name": "Kambaz",
+      "year": "2025",
+      "madeAt": "Academic Project",
+      "flagship": false,
+      "image": "",
+      "description": "• Modern LMS with Next.js 15.5 frontend and React 19 components\n• Express.js backend with 20+ REST API endpoints and JWT authentication\n• MongoDB database with Mongoose ODM for persistent data storage\n• Course management system with hierarchical organization\n• Quiz creation engine with automatic grading and answer validation\n• Student progress tracking with performance analytics\n+• Instructor dashboard for course management and student oversight\n+• Multi-user role support (Students, Instructors, Admins)\n+• Real-time notifications and event broadcasts\n+• Dockerized deployment and responsive Bootstrap UI",
+      "skills": ["Next.js 15.5", "React 19", "Redux Toolkit", "TypeScript", "Express.js", "MongoDB", "JWT Authentication", "Server-Side Rendering", "Full-Stack", "Education-Tech"],
+      "mainLink": "https://github.com/Rushikesh36/kambaz-next-js-app",
+      "sideLinks": [
+        {"label": "LMS Frontend", "link": "https://github.com/Rushikesh36/kambaz-next-js-app"},
+        {"label": "Quiz Module", "link": "https://github.com/Rushikesh36/kambaz-quiz"},
+        {"label": "Server API", "link": "https://github.com/Rushikesh36/kambaz-node-server-app"},
+        {"label": "Quiz Server", "link": "https://github.com/Rushikesh36/gurunetwork-firestore-sheets-sync"}
+      ]
+    },
+    {
+      "name": "GuruNetwork",
+      "year": "2024",
+      "madeAt": "Freelance",
+      "flagship": false,
+      "image": "images/guru_network.png",
+      "description": "• Vue.js 3 Single Page Application (SPA) with Firebase backend\n• 7 user categories with dynamic forms: agents, buyers, sellers, investors, admins, guests, auditors\n• Real-time Cloud Firestore synchronization with offline capabilities\n• 10-minute automated Google Sheets sync for data reporting\n• Cloud Functions microservices for business logic\n+• SendGrid email automation with customizable templates\n+• ETL pipelines for data consistency and deduplication\n+• Firestore triggers for transactional workflows\n+• Google OAuth authentication for secure access\n+• Role-based access control (RBAC) for multi-team collaboration",
+      "skills": ["Vue.js 3", "Firebase", "Cloud Firestore", "Google Sheets API", "Cloud Functions", "ETL Pipeline", "Real-time Sync", "Serverless", "Email Automation", "Google Cloud"],
+      "mainLink": "https://github.com/Rushikesh36/guru-network-website",
+      "sideLinks": [
+        {"label": "Website", "link": "https://github.com/Rushikesh36/guru-network-website"},
+        {"label": "Automatic Mailer", "link": "https://github.com/Rushikesh36/gurunetwork-automatic-mailer"},
+        {"label": "Firestore-Sheets Sync", "link": "https://github.com/Rushikesh36/gurunetwork-firestore-sheets-sync"}
+      ]
+    },
+    {
+      "name": "Marathe Group",
+      "year": "2024",
+      "madeAt": "Freelance",
+      "flagship": false,
+      "image": "",
+      "description": "• Professional website at marathegroup.co.in with Vue.js 3 + Vuetify\n• Interactive Swiper.js property galleries with smooth transitions\n• AOS (Animate On Scroll) animations for engaging UX\n• EmailJS contact forms with automatic response emails\n• Mobile app via Android WebView for cross-platform reach",
+      "skills": ["Vue.js 3", "Vuetify", "Firebase", "Swiper.js", "AOS Animations", "EmailJS", "Vue-pdf", "WebView", "Real Estate", "Responsive Design"],
+      "mainLink": "https://github.com/Rushikesh36/marathe-group-website",
+      "sideLinks": [
+        {"label": "Website", "link": "https://github.com/Rushikesh36/marathe-group-website"},
+        {"label": "Property App", "link": "https://github.com/Rushikesh36/marathe-group-app"}
+      ]
+    },
+    {
+      "name": "Shree Ganesh Agency",
+      "year": "2024",
+      "madeAt": "Freelance",
+      "flagship": false,
+      "image": "",
+      "description": "• Enterprise CRM built with Vue.js 3 and Firebase backend\n• Comprehensive client CRUD operations with lifecycle management\n• Intelligent billing system with invoice tracking\n• Auto-generated PDF invoices with dynamic templates",
+      "skills": ["Vue.js 3", "Firebase", "Cloud Firestore", "Google OAuth", "PDF Generation", "CRUD Operations", "Real-time Sync", "Business Management", "Billing System", "Document Generation"],
+      "mainLink": "https://github.com/Rushikesh36/Shree-Ganesh-Agency",
+      "sideLinks": []
+    }
+  ],
+  "achievements": [
+    {
+      "title": "Detection of Counterfeit Products Using Blockchain",
+      "type": "Publication",
+      "publisher": "ITM Web of Conferences, ICACC 2022",
+      "date": "2022",
+      "description": "Published peer-reviewed paper on blockchain-based counterfeit detection. Received Copyright Certificate from the Government of India.",
+      "link": "https://doi.org/10.1051/itmconf/20224403015"
+    }
+  ],
+  "recommendations": [
+    {
+      "name": "Arthur Smith",
+      "headline": "Associate Director Core Platform at Aptus Health",
+      "date": "January 13, 2026",
+      "relation": "Arthur managed Rushikesh directly",
+      "visibility": "All LinkedIn members",
+      "platform": "LinkedIn",
+      "text": "Rushikesh is a highly dependable developer who consistently impressed me with his ability to take ownership of complex problems and deliver fast, reliable solutions. Beyond his strong technical skills, he’s warm and approachable, quickly masters new concepts, mentors colleagues, and fully commits to the success of every initiative. I genuinely enjoyed working with him and would welcome the chance to work together again without hesitation."
+    },
+    {
+      "name": "Anis Melliti",
+      "headline": "European Tech Lead at Aptus Health",
+      "date": "November 26, 2025",
+      "relation": "Anis managed Rushikesh directly",
+      "visibility": "All LinkedIn members",
+      "platform": "LinkedIn",
+      "text": "I had the pleasure of leading Rushikesh for three years, and during that time he proved to be one of those rare teammates who combines curiosity, discipline, and genuine passion for building great software. From day one, he showed how quickly he could learn new technologies, but what stood out even more was how fast he turned that knowledge into real value for our projects. Whenever there was an opportunity to apply a new technique or improve a workflow, he was the first to explore it and the first to put it into action. His willingness to experiment and learn didn’t just help our team evolve technically — it pushed us to think bigger. As he grew within the team, Rushikesh naturally started taking ownership of initiatives. Without needing much time, he began leading technical improvements and mentoring others with a calm, thoughtful approach that earned everyone’s respect. Overall, he’s a fast learner, intelligent, and genuinely hardworking but also someone who elevates the people around him. I have no doubt he will continue to excel in any environment he joins next"
+    },
+    {
+      "name": "Gopal Hannurkar",
+      "headline": "Software Engineer | Front End Developer | Vue.js | SPA | SSR | JavaScript | HTML | CSS | Node js | Agile | Jira",
+      "date": "November 24, 2025",
+      "relation": "Gopal worked with Rushikesh on the same team",
+      "visibility": "All LinkedIn members",
+      "platform": "LinkedIn",
+      "text": "I had the absolute pleasure of working with Rushikesh at WebMD. He is a highly skilled software engineer who consistently solved complex problems across multiple web development projects. Rushikesh not only improved overall page performance but also enhanced the architecture of our applications, making them more scalable and maintainable. His technical expertise, proactive approach, and dedication to quality make him an invaluable asset to any team. I highly recommend Rushikesh for any software development role."
+    },
+    {
+      "name": "Ashwini Dhure",
+      "headline": "Technical Lead at WebMD",
+      "date": "November 20, 2025",
+      "relation": "Ashwini managed Rushikesh directly",
+      "visibility": "All LinkedIn members",
+      "platform": "LinkedIn",
+      "text": "Over the 2.5 years I supervised Rushikesh at WebMD, he became a go-to contributor on our JIM and Univadis initiatives. Rushikesh combines strong technical judgment with thoughtful collaboration — he breaks down complex problems, proposes practical solutions, and helps bring teammates along through clear communication and knowledge sharing. He consistently met deadlines, embraced feedback, and showed an eagerness to learn that noticeably improved our team’s workflow and output. I have no doubt Rushikesh will excel in new challenges and would be an excellent addition to any organization as he advances his career in the U.S."
+    },
+    {
+      "name": "Chakib Melaika",
+      "headline": "Director, Technical Project Management @WebMD",
+      "date": "November 18, 2025",
+      "relation": "Chakib managed Rushikesh directly",
+      "visibility": "All LinkedIn members",
+      "platform": "LinkedIn",
+      "text": "Rushikesh is one of the best developer I had the pleasure to work with. In the project that I was leading he was a true pillar in the team. Rushikesh act as a problem solver and can navigate complex technical layers to achieve his tasks. Beyond his technical expertise, Rushikesh is a great team player: proactive, communicative, and always willing to help. I highly recommend Rushikesh for any cross-functional engineering role. Any team would be lucky to have him."
+    },
+    {
+      "name": "Pawan Sundargiri",
+      "headline": "Software Engineer @WebMD",
+      "date": "November 18, 2025",
+      "relation": "Rushikesh was senior to Pawan but didn’t manage Pawan directly",
+      "visibility": "All LinkedIn members",
+      "platform": "LinkedIn",
+      "text": "I’d like to highly recommend Rushikesh for his exceptional problem-solving skills and remarkable communication abilities. His thoughtful and structured approach to tackling challenges consistently stands out. Rushikesh played a key role in building JIMFR and is also instrumental in shaping the Element Plus architecture for Medacape pages, including the migration of existing pages to Element Plus. Beyond his technical contributions, Rushikesh also served as my mentor during my early days at the company, providing guidance and support that greatly accelerated my learning and onboarding. His dedication, leadership, and expertise make him an invaluable asset to any team"
+    }
+  ]
+}
